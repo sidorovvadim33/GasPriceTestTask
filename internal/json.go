@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"math/big"
 )
 
@@ -28,10 +29,16 @@ type PriceFrequencyDistributionByHour struct {
 	GasPrice *big.Float `json:"gas_price"`
 }
 
-func (j *ResultJson) WriteJson() {
-	file, _ := json.MarshalIndent(j, "", " ")
+func (j *ResultJson) WriteJson(path string) {
+	file, err := json.MarshalIndent(j, "", " ")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	_ = ioutil.WriteFile("test.json", file, 0644)
+	err = ioutil.WriteFile(path, file, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (j *ResultJson) AddGasSpentMonthly(g GasSpentMonthly) {

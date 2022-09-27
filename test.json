@@ -1,6 +1,14 @@
 {
  "spent_monthly": [
   {
+   "month": "April",
+   "gas_spent": "163390.28454586765"
+  },
+  {
+   "month": "May",
+   "gas_spent": "231997.98117067254"
+  },
+  {
    "month": "June",
    "gas_spent": "144079.75642168897"
   },
@@ -23,14 +31,6 @@
   {
    "month": "March",
    "gas_spent": "145428.7007711528"
-  },
-  {
-   "month": "April",
-   "gas_spent": "163390.28454586765"
-  },
-  {
-   "month": "May",
-   "gas_spent": "231997.98117067254"
   }
  ],
  "avg_daily_price": [

@@ -27,7 +27,7 @@ type GasSumCount struct {
 	count int32
 }
 
-func ParseJson(url string) {
+func ParseJson(url string, path string) {
 	jsonFileStruct := JsonFileStruct{}
 
 	client := &http.Client{Timeout: 10 * time.Second}
@@ -56,9 +56,8 @@ func ParseJson(url string) {
 
 	// 4)
 	getEntirePeriodGasPaid(jsonFileStruct, &resultJson)
-	//fmt.Printf("%.50f\n", getEntirePeriodGasPaid(jsonFileStruct))
 
-	resultJson.WriteJson()
+	resultJson.WriteJson(path)
 }
 
 //	1) Сколько было потрачено gas помесячно.
