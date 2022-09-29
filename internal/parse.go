@@ -2,10 +2,12 @@ package internal
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/big"
 	"net/http"
 	"sort"
+	"sync"
 	"time"
 )
 
@@ -44,24 +46,40 @@ func ParseJson(url string, path string) {
 	}
 
 	resultJson := ResultJson{}
+	start := time.Now()
+	wg := sync.WaitGroup{}
+	wg.Add(4)
 
 	// 1)
-	gasSpentPerMonth(jsonFileStruct, &resultJson)
-
+	go func() {
+		gasSpentPerMonth(&jsonFileStruct, &resultJson)
+		wg.Done()
+	}()
 	// 2)
-	averageGasPricePerDay(jsonFileStruct, &resultJson)
-
+	go func() {
+		averageGasPricePerDay(&jsonFileStruct, &resultJson)
+		wg.Done()
+	}()
 	// 3)
-	frequencyDistributionPricePerHour(jsonFileStruct, &resultJson)
+	go func() {
+		frequencyDistributionPricePerHour(&jsonFileStruct, &resultJson)
+		wg.Done()
+	}()
 
 	// 4)
-	getEntirePeriodGasPaid(jsonFileStruct, &resultJson)
+	go func() {
+		getEntirePeriodGasPaid(&jsonFileStruct, &resultJson)
+		wg.Done()
+	}()
+	wg.Wait()
+	duration := time.Since(start)
+	fmt.Println("\nВремя выполнения 4 функций:", duration)
 
 	resultJson.WriteJson(path)
 }
 
 //	1) Сколько было потрачено gas помесячно.
-func gasSpentPerMonth(jsonFileStruct JsonFileStruct, resultJson *ResultJson) map[time.Month]*big.Float {
+func gasSpentPerMonth(jsonFileStruct *JsonFileStruct, resultJson *ResultJson) map[time.Month]*big.Float {
 	monthGasSum := make(map[time.Month]*big.Float)
 	for _, transaction := range jsonFileStruct.Ethereum.Transactions {
 		parse, err := time.Parse("06-01-02 15:04", transaction.Time)
@@ -87,7 +105,7 @@ func gasSpentPerMonth(jsonFileStruct JsonFileStruct, resultJson *ResultJson) map
 }
 
 //	2) Среднюю цену gas за день.
-func averageGasPricePerDay(jsonFileStruct JsonFileStruct, resultJson *ResultJson) {
+func averageGasPricePerDay(jsonFileStruct *JsonFileStruct, resultJson *ResultJson) {
 	avgGasPricePerDay := make(map[time.Time]GasSumCount)
 	for _, transaction := range jsonFileStruct.Ethereum.Transactions {
 		parse, err := time.Parse("06-01-02 15:04", transaction.Time)
@@ -133,7 +151,7 @@ func averageGasPricePerDay(jsonFileStruct JsonFileStruct, resultJson *ResultJson
 }
 
 //	3) Частотное распределение цены по часам(за весь период).
-func frequencyDistributionPricePerHour(jsonFileStruct JsonFileStruct, resultJson *ResultJson) {
+func frequencyDistributionPricePerHour(jsonFileStruct *JsonFileStruct, resultJson *ResultJson) {
 	frequencyDistribution := make(map[int]GasSumCount)
 	for _, transaction := range jsonFileStruct.Ethereum.Transactions {
 		parse, err := time.Parse("06-01-02 15:04", transaction.Time)
@@ -177,7 +195,7 @@ func frequencyDistributionPricePerHour(jsonFileStruct JsonFileStruct, resultJson
 }
 
 //	4) Сколько заплатили за весь период (gas price * value).
-func getEntirePeriodGasPaid(jsonFileStruct JsonFileStruct, resultJson *ResultJson) {
+func getEntirePeriodGasPaid(jsonFileStruct *JsonFileStruct, resultJson *ResultJson) {
 	sum := new(big.Float)
 	for _, transaction := range jsonFileStruct.Ethereum.Transactions {
 		gasPrice := new(big.Float).SetFloat64(transaction.GasPrice)

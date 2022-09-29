@@ -18,6 +18,5 @@ func main() {
 	internal.ParseJson(url, jsonFilePath)
 
 	duration := time.Since(start)
-
-	fmt.Println("\nВремя выполнения:", duration)
+	fmt.Println("\nВремя выполнения всей программы:", duration)
 }

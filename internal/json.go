@@ -8,7 +8,10 @@ import (
 )
 
 type ResultJson struct {
-	SpentMonthly      []GasSpentMonthly                  `json:"spent_monthly"`
+	GasSpentMonthly []struct {
+		Month    string     `json:"month"`
+		GasSpent *big.Float `json:"gas_spent"`
+	} `json:"spent_monthly"`
 	AvgDailyPrice     []AverageDailyPrice                `json:"avg_daily_price"`
 	FreqDistribByHour []PriceFrequencyDistributionByHour `json:"freq_distribution_by_hour"`
 	EntirePeriodPaid  *big.Float                         `json:"paid"`
@@ -42,7 +45,7 @@ func (j *ResultJson) WriteJson(path string) {
 }
 
 func (j *ResultJson) AddGasSpentMonthly(g GasSpentMonthly) {
-	j.SpentMonthly = append(j.SpentMonthly, g)
+	j.GasSpentMonthly = append(j.GasSpentMonthly, g)
 }
 
 func (j *ResultJson) AddAverageDailyPrice(a AverageDailyPrice) {
